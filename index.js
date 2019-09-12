@@ -35,7 +35,10 @@ const https = require('https'),
 							err.data = data;
 							reject(err);
 						} else {
-							resolve({ res, data: JSON.parse(data) });
+							resolve({
+								res,
+								data: JSON.parse(data)
+							});
 						}
 					});
 				})
@@ -48,11 +51,6 @@ const https = require('https'),
 		}),
 	event = require(GITHUB_EVENT_PATH),
 	{
-		pull_request: {
-			head: {
-				sha: prSha
-			}
-		},
 		repository: {
 			name: repo,
 			owner: {
@@ -60,9 +58,15 @@ const https = require('https'),
 			}
 		}
 	} = event,
-	checkName = 'ESLint check',
-	checkSha = prSha || GITHUB_SHA,
-	headers = {
+	checkName = 'ESLint check';
+
+let checkSha = GITHUB_SHA;
+
+if (event.pull_request) {
+	checkSha = event.pull_request.head.sha;
+}
+
+const headers = {
 		'Content-Type': 'application/json',
 		Accept: 'application/vnd.github.antiope-preview+json',
 		Authorization: `Bearer ${ GITHUB_TOKEN }`,
