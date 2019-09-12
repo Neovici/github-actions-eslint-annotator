@@ -1,6 +1,6 @@
 {
   "name": "@neovici/github-actions-eslint-annotator",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Create ESLint Checks when running in Github Actions",
   "bin": "./index.js",
   "main": "index.js",
