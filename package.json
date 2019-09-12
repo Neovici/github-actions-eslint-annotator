@@ -1,0 +1,37 @@
+{
+  "name": "@neovici/github-actions-eslint-annotator",
+  "version": "0.1.2",
+  "description": "Create ESLint Checks when running in Github Actions",
+  "bin": "./index.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Neovici/github-actions-eslint-annotator.git"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "eslint",
+    "annotations",
+    "checks"
+  ],
+  "author": "Neovici",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Neovici/github-actions-eslint-annotator/issues"
+  },
+  "homepage": "https://github.com/Neovici/github-actions-eslint-annotator#readme",
+  "dependencies": {
+    "eslint": "^5.15.1"
+  },
+  "devDependencies": {
+    "@neovici/eslint-config": "github:neovici/eslint-config#semver:^1.0.0",
+    "babel-eslint": "^10.0.2",
+    "eslint-plugin-html": "^5.0.3",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-mocha": "^5.3.0"
+  }
+}
