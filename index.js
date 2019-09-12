@@ -63,14 +63,7 @@ const https = require('https'),
 let checkSha = GITHUB_SHA;
 
 if (event.pull_request) {
-	const {
-		pull_request: {
-			head: {
-				sha: prSha
-			}
-		}
-	} = event;
-	checkSha = prSha;
+	checkSha = event.pull_request.head.sha;
 }
 
 const headers = {
