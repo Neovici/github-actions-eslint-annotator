@@ -16,6 +16,7 @@ In your Github Actions workflow:
       run: npx github-actions-eslint-annotator
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PARTIAL_LINTING: true # default: false, only works on PRs
 ```
 
 ## Example output
