@@ -85,10 +85,24 @@ const headers = {
 		});
 		return data.id;
 	},
-	eslint = () => {
+	getChangedFiles = async targetBranch => {
+		const util = require("util");
+		const exec = util.promisify(require("child_process").exec);
+		const { stdout, stderr } = await exec(
+		  `git diff origin/${targetBranch}... --name-only --diff-filter=d`
+		);
+		return stdout.trim().split("\n");
+	  },
+	  eslint = async () => {
+		const partialLinting = process.env.PARTIAL_LINTING; //false
+		let files = ['.'];
+		if (partialLinting && event.pull_request) {
+			const branch = event.pull_request.base.ref;
+			files = await getChangedFiles(branch);
+		};
 		const eslint = require('eslint'),
 			cli = new eslint.CLIEngine(),
-			report = cli.executeOnFiles(['.']),
+			report = cli.executeOnFiles(files),
 			// fixableErrorCount, fixableWarningCount are available too
 			levels = ['notice', 'warning', 'failure'];
 
@@ -138,7 +152,7 @@ const headers = {
 	run = async () => {
 		const id = await createCheck();
 		try {
-			const { conclusion, output } = eslint();
+			const { conclusion, output } = await eslint();
 			console.log(conclusion, output);
 			await updateCheck(id, conclusion, output);
 		} catch (err) {
