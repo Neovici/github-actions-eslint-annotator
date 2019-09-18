@@ -85,24 +85,24 @@ const headers = {
 		});
 		return data.id;
 	},
-	getChangedFiles = async () => {
+	getChangedFiles = async targetBranch => {
 		const util = require("util");
 		const exec = util.promisify(require("child_process").exec);
-		const event = require(GITHUB_EVENT_PATH);
-		const targetBranch = event.pull_request.base.ref;
 		const { stdout, stderr } = await exec(
 		  `git diff origin/${targetBranch}... --name-only --diff-filter=d`
 		);
 		return stdout.trim().split("\n");
 	  },
 	  eslint = async () => {
-		const event = require(GITHUB_EVENT_PATH);
 		const partialLinting = process.env.PARTIAL_LINTING; //false
+		let files = ['.'];
+		if (partialLinting && event.pull_request) {
+			const branch = event.pull_request.base.ref;
+			files = await getChangedFiles(branch);
+		};
 		const eslint = require('eslint'),
 			cli = new eslint.CLIEngine(),
-			report = partialLinting && event.pull_request ?
-				cli.executeOnFiles(await getChangedFiles())
-          		: cli.executeOnFiles(["."]),
+			report = cli.executeOnFiles(files),
 			// fixableErrorCount, fixableWarningCount are available too
 			levels = ['notice', 'warning', 'failure'];
 
