@@ -39,10 +39,11 @@ jobs:
         SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
         SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       run: |
-        ([[ -e $NEO_CC ]] || curl -L $NEO_CC_URL > $NEO_CC) && chmod +x $NEO_CC
-        $NEO_CC before-build
-        npm run test $([ -z "$SAUCE_ACCESS_KEY"] && echo "-- --skip-plugin sauce")
-        $NEO_CC after-build --exit-code $?
+        # ([[ -e $NEO_CC ]] || curl -L $NEO_CC_URL > $NEO_CC) && chmod +x $NEO_CC
+        # $NEO_CC before-build
+        # npm run test $([ -z "$SAUCE_ACCESS_KEY"] && echo "-- --skip-plugin sauce")
+        # $NEO_CC after-build --exit-code $?
+        npm test
 
     - name: Semantic release
       run: npx semantic-release
