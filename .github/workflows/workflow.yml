@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@master
-      
+      uses: actions/checkout@v1
+
     - name: Use Node.js 10.x
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
-        
+
     - name: Install
       run: npm ci
 
@@ -28,7 +28,7 @@ jobs:
       run: node index.js
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-     
+
     - name: Test and report
       env:
         CC_TEST_REPORTER_ID: 7b59d48d068bcdb14ae1b91f5290389a98328823eefc7f2ff657ae512b040909
