@@ -9,7 +9,9 @@ const exitWithError = err => {
 		}
 		process.exit(1);
 	},
-	{ GITHUB_SHA, GITHUB_EVENT_PATH, GITHUB_TOKEN, GITHUB_WORKSPACE } = process.env;
+	{
+		GITHUB_SHA, GITHUB_EVENT_PATH, GITHUB_TOKEN, GITHUB_WORKSPACE
+	} = process.env;
 
 if (GITHUB_TOKEN == null) {
 	exitWithError(new Error('Missing Github token'));
@@ -112,8 +114,8 @@ const headers = {
 					const singleLine = m.line === m.endLine || m.endLine === undefined;
 					return {
 						path,
-						start_column: singleLine && m.column,
-						end_column: singleLine && m.endColumn,
+						start_column: singleLine ? m.column : undefined,
+						end_column: singleLine ? m.endColumn || m.column : undefined,
 						start_line: m.line,
 						end_line: m.endLine || m.line,
 						annotation_level: levels[m.severity],
@@ -124,39 +126,64 @@ const headers = {
 				}));
 			}, []),
 
-			{ errorCount, warningCount } = report;
-
+			{
+				errorCount, warningCount
+			} = report;
 		return {
-			conclusion: errorCount > 0 ? 'failure' : 'success',
-			output: {
-				title: checkName,
-				summary: `${ errorCount } error(s), ${ warningCount } warning(s) found`,
-				text: 'A little bit of text',
-				annotations
-			}
+			annotations,
+			errorCount,
+			warningCount
 		};
 	},
-	updateCheck = async (id, conclusion, output) =>
+	updateCheck = async (id, opts = {}) =>
 		await request(`https://api.github.com/repos/${ owner }/${ repo }/check-runs/${ id }`, {
 			method: 'PATCH',
 			headers,
 			body: {
 				name: checkName,
 				head_sha: checkSha,
-				status: 'completed',
-				completed_at: (new Date()).toISOString(),
-				conclusion,
-				output
+				...opts
 			}
 		}),
+	updateChecks = async (id, {
+		errorCount, warningCount, annotations
+	}) => {
+		const chunkSize = 50,
+			chunksLength = Math.ceil(annotations.length / chunkSize);
+
+		await Promise.all(new Array(chunksLength).fill().map((_, i) => updateCheck(id, {
+			status: 'in_progress',
+			output: {
+				title: checkName,
+				summary: `${ errorCount } error(s), ${ warningCount } warning(s) found`,
+				annotations: annotations.slice(i * chunkSize, (i + 1) * chunkSize)
+			}
+		})));
+
+		await updateCheck(id, {
+			status: 'completed',
+			completed_at: (new Date()).toISOString(),
+			conclusion: errorCount > 0 ? 'failure' : 'success',
+			output: {
+				title: checkName,
+				summary: `${ errorCount } error(s), ${ warningCount } warning(s) found`
+			}
+		});
+	},
 	run = async () => {
 		const id = await createCheck();
 		try {
-			const { conclusion, output } = await eslint();
-			console.log(conclusion, output);
-			await updateCheck(id, conclusion, output);
+			await updateChecks(id, await eslint());
 		} catch (err) {
-			await updateCheck(id, 'failure');
+			await updateCheck(id, {
+				conclusion: 'failure',
+				status: 'completed',
+				completed_at: (new Date()).toISOString(),
+				output: {
+					title: checkName,
+					summary: `Error while performing the check: ${err.message}`
+				}
+			});
 			exitWithError(err);
 		}
 	};
