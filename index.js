@@ -109,13 +109,13 @@ const headers = {
 		const annotations = report.results.reduce((annoList, result) => {
 				const path = result.filePath.substring(GITHUB_WORKSPACE.length + 1);
 				return annoList.concat(result.messages.map(m => {
-					const singleLine = m.line === m.endLine;
+					const singleLine = m.line === m.endLine || m.endLine === undefined;
 					return {
 						path,
 						start_column: singleLine && m.column,
 						end_column: singleLine && m.endColumn,
 						start_line: m.line,
-						end_line: m.endLine,
+						end_line: m.endLine || m.line,
 						annotation_level: levels[m.severity],
 						// title: `${ path }#L${ m.line }`,
 						// raw_details: 'Nothing much',
