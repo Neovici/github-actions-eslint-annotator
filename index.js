@@ -163,7 +163,7 @@ const headers = {
 		await updateCheck(id, {
 			status: 'completed',
 			completed_at: (new Date()).toISOString(),
-			conclusion: errorCount > 0 ? 'failure' : 'success',
+			conclusion: errorCount > 0 ? 'failure' : warningCount > 0 && 'neutral' || 'success',
 			output: {
 				title: checkName,
 				summary: `${ errorCount } error(s), ${ warningCount } warning(s) found`
